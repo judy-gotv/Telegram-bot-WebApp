@@ -642,6 +642,8 @@ def handle_group(msg):
         return
     if cmd not in ("/who", "/del", "/ban", "/unban"):
         return
+    if not GROUP_CHAT_ID or str(chat_id) != str(GROUP_CHAT_ID):
+        return  # 管理命令只在目标群生效（/id 已在上面单独处理，任意群可用）
     reply = msg.get("reply_to_message")
     if not reply:
         return
@@ -708,7 +710,9 @@ def poll_loop():
             try:
                 if msg["chat"]["type"] == "private":
                     handle_private(msg)
-                elif int(msg["chat"]["id"]) == int(GROUP_CHAT_ID):
+                elif msg["chat"]["type"] in ("group", "supergroup"):
+                    # 群消息都进 handle_group：/id 任意群可用（配置时查群ID），
+                    # /who 等管理命令在函数内再校验是否为目标群
                     handle_group(msg)
             except Exception as e:
                 log("[handle] error:", e)
