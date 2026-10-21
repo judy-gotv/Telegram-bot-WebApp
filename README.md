@@ -65,10 +65,14 @@ docker compose up -d
 或直接用 GHCR 镜像（main 推送自动构建，amd64+arm64）：
 
 ```bash
-docker run -d --name anon-bot --restart unless-stopped \
-  -p 8080:8080 -v /opt/anon-bot-data:/data \
+docker run -d \
+  --name anon-bot \
+  --restart unless-stopped \
+  -p 19952:8080 \
+  -v /opt/anon-bot-data:/data \
   --env-file .env \
   ghcr.io/judy-gotv/telegram-bot-webapp:latest
+
 ```
 
 查群 ID：服务跑起来后，在目标群里发送 `/id`，机器人会回本群 ID（如 `-1001234567890`），填回 `.env` 的 `GROUP_CHAT_ID` 后重启容器即可。
