@@ -199,7 +199,32 @@ db = DB(DB_PATH)
 
 API_BASE = "https://api.telegram.org/bot%s/" % BOT_TOKEN
 BOT_USERNAME = ""          # getMe 后填充
+BOT_ID = 0                 # getMe 后填充
 GROUP_USERNAME = ""        # getChat 后填充（群公开用户名，可空）
+_avatar_cache = {"data": None, "ctype": "image/jpeg", "ts": 0}
+
+def get_bot_avatar():
+    """拉取机器人自己的头像（BotFather /setuserpic 设置的那张），内存缓存 1 小时。
+    没有头像或拉取失败返回 None，前端会回退到默认 A6 字标。"""
+    now = time.time()
+    if now - _avatar_cache["ts"] < 3600 and _avatar_cache["ts"]:
+        return _avatar_cache["data"], _avatar_cache["ctype"]
+    data, ctype = None, "image/jpeg"
+    if not PREVIEW_MODE and BOT_ID:
+        try:
+            res = tg("getUserProfilePhotos", {"user_id": BOT_ID, "limit": 1})
+            photos = (res or {}).get("photos") or []
+            if photos:
+                file_id = photos[0][-1]["file_id"]          # 取最大尺寸
+                f = tg("getFile", {"file_id": file_id})
+                url = "https://api.telegram.org/file/bot%s/%s" % (BOT_TOKEN, f["file_path"])
+                with urllib.request.urlopen(url, timeout=15) as resp:
+                    data = resp.read()
+                    ctype = resp.headers.get_content_type() or ctype
+        except Exception as e:
+            log("[avatar] fetch failed:", e)
+    _avatar_cache.update({"data": data, "ctype": ctype, "ts": now})
+    return data, ctype
 _admin_cache = {}          # user_id -> (is_admin, ts)
 
 class TGError(Exception):
@@ -776,6 +801,17 @@ class WebHandler(BaseHTTPRequestHandler):
         elif path == "/health":
             self._json(200, {"ok": True, "preview": PREVIEW_MODE,
                              "bot": BOT_USERNAME, "group": GROUP_NAME})
+        elif path == "/avatar":
+            data, ctype = get_bot_avatar()
+            if data:
+                self.send_response(200)
+                self.send_header("Content-Type", ctype)
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Cache-Control", "public, max-age=3600")
+                self.end_headers()
+                self.wfile.write(data)
+            else:
+                self._json(404, {"ok": False, "error": "no avatar"})
         else:
             self._json(404, {"ok": False, "error": "not found"})
 
@@ -870,9 +906,10 @@ def serve_http():
 # ---------------------------------------------------------------- 入口
 
 def setup_bot():
-    global BOT_USERNAME, GROUP_USERNAME, GROUP_NAME
+    global BOT_USERNAME, BOT_ID, GROUP_USERNAME, GROUP_NAME
     me = tg("getMe")
     BOT_USERNAME = me.get("username", "")
+    BOT_ID = me.get("id", 0)
     log("[bot] I am @%s (%s)" % (BOT_USERNAME, me.get("first_name")))
     try:
         chat = tg("getChat", {"chat_id": GROUP_CHAT_ID})

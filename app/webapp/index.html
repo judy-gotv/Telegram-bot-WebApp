@@ -24,9 +24,14 @@
   }
   .head { display: flex; align-items: flex-start; gap: 12px; }
   .logo {
+    position: relative; overflow: hidden;
     flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
     background: linear-gradient(135deg, #3ddc68 0%, #18b7a4 45%, #0a84ff 100%);
     display: flex; align-items: center; justify-content: center;
+  }
+  .logo img {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: cover; border-radius: 50%;
   }
   .logo span {
     width: 45px; height: 45px; border-radius: 50%; background: #fff;
@@ -106,7 +111,7 @@
 <body>
 <div class="card" id="card">
   <div class="head">
-    <div class="logo"><span>A6</span></div>
+    <div class="logo"><span>A6</span><img src="/avatar" alt="" onerror="this.remove()"></div>
     <div class="head-main">
       <div class="group-name">__GROUP_NAME__</div>
       <div class="subtitle" data-i18n="subtitle"></div>

@@ -116,5 +116,34 @@ class I18nTest(unittest.TestCase):
         self.assertEqual(opts, self.EXPECTED_LANGS)
 
 
+class AvatarTest(unittest.TestCase):
+    def test_preview_no_avatar(self):
+        # 无 Token 预览模式 / 未知 BOT_ID 时应返回 None，前端回退 A6 字标
+        data, _ctype = bot.get_bot_avatar()
+        self.assertIsNone(data)
+
+
+class KeyboardTest(unittest.TestCase):
+    def test_main_app_link_without_short_name(self):
+        bot.BOT_USERNAME = "mybot"
+        kb = bot.post_keyboard(123)
+        btns = kb["inline_keyboard"][0]
+        self.assertEqual(btns[0]["text"], "✍️ 弹窗发言")
+        self.assertEqual(btns[0]["url"], "https://t.me/mybot?startapp=reply_123")
+        self.assertEqual(btns[1]["text"], "💬 私聊发言")
+        self.assertEqual(btns[1]["url"], "https://t.me/mybot?start=reply_123")
+
+    def test_named_app_link_with_short_name(self):
+        bot.BOT_USERNAME = "mybot"
+        old = bot.APP_SHORT_NAME
+        bot.APP_SHORT_NAME = "app"
+        try:
+            kb = bot.post_keyboard(123)
+            self.assertEqual(kb["inline_keyboard"][0][0]["url"],
+                             "https://t.me/mybot/app?startapp=reply_123")
+        finally:
+            bot.APP_SHORT_NAME = old
+
+
 if __name__ == "__main__":
     unittest.main()
