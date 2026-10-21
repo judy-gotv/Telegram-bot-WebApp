@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<!-- Author: Passwd Word -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>__BOT_NAME__</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    background: #e9edf1; color: #17212b; min-height: 100vh;
+  }
+  .card {
+    max-width: 480px; margin: 0 auto; background: #fff; min-height: 100vh;
+    padding: 22px 20px 18px; display: flex; flex-direction: column;
+  }
+  @media (min-width: 520px) {
+    body { padding: 24px 0; }
+    .card { min-height: auto; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,.18); }
+  }
+  .head { display: flex; align-items: flex-start; gap: 12px; }
+  .logo {
+    flex: 0 0 auto; width: 56px; height: 56px; border-radius: 50%;
+    background: linear-gradient(135deg, #3ddc68 0%, #18b7a4 45%, #0a84ff 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo span {
+    width: 45px; height: 45px; border-radius: 50%; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-style: italic; font-size: 20px; color: #111;
+    letter-spacing: -1px;
+  }
+  .head-main { flex: 1 1 auto; min-width: 0; }
+  .group-name { font-size: 19px; font-weight: 700; line-height: 1.3; word-break: break-word; }
+  .subtitle { color: #707579; font-size: 13px; margin-top: 3px; }
+  .lang-wrap { flex: 0 0 auto; }
+  select#lang {
+    appearance: none; -webkit-appearance: none;
+    border: 1.5px solid #2f9be8; border-radius: 8px; background: #fff;
+    color: #17212b; font-size: 13px; padding: 6px 26px 6px 10px; cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23333' stroke-width='1.6' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+  }
+  .intro { display: flex; gap: 8px; margin-top: 16px; color: #444; font-size: 13.5px; line-height: 1.55; }
+  .intro .dot { flex: 0 0 auto; width: 7px; height: 7px; border-radius: 50%; background: #31b545; margin-top: 7px; }
+  .reply-banner {
+    display: none; margin-top: 14px; background: #eef6fd; border-left: 3px solid #2f9be8;
+    border-radius: 6px; padding: 8px 10px; font-size: 13px; color: #33546e;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .ask-row { display: flex; justify-content: space-between; align-items: baseline; margin-top: 18px; }
+  .ask { font-size: 15px; font-weight: 700; }
+  .counter { color: #9aa1a6; font-size: 12px; }
+  textarea {
+    width: 100%; margin-top: 10px; min-height: 148px; resize: vertical;
+    border: 1.5px solid #cfd6dd; border-radius: 10px; padding: 12px;
+    font-size: 15px; line-height: 1.5; font-family: inherit; outline: none; background: #fdfdfd;
+  }
+  textarea:focus { border-color: #2f9be8; background: #fff; }
+  .card.dragover textarea { border-color: #2f9be8; box-shadow: 0 0 0 3px rgba(47,155,232,.25); }
+  .hint { color: #9aa1a6; font-size: 12px; margin-top: 7px; }
+  .img-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  button.add-img {
+    border: 1.5px solid #2f9be8; color: #1b8fe0; background: #fff; border-radius: 8px;
+    font-size: 13.5px; padding: 7px 14px; cursor: pointer; font-weight: 500;
+  }
+  button.add-img:active { background: #eef6fd; }
+  .img-note { color: #707579; font-size: 12.5px; }
+  .thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .thumbs:empty { display: none; }
+  .thumb { position: relative; width: 64px; height: 64px; }
+  .thumb img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; cursor: zoom-in; }
+  .thumb .rm {
+    position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: rgba(20,20,20,.75); color: #fff; font-size: 13px; line-height: 20px;
+    text-align: center; cursor: pointer; padding: 0;
+  }
+  .meta-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; }
+  .nickname { color: #444; font-size: 13px; word-break: break-all; }
+  .ret { display: flex; align-items: center; gap: 6px; color: #444; font-size: 13px; white-space: nowrap; cursor: pointer; }
+  .ret input { width: 17px; height: 17px; accent-color: #2f9be8; cursor: pointer; }
+  .status { color: #707579; font-size: 13px; margin-top: 12px; min-height: 18px; }
+  .status.err { color: #d33; }
+  .status.ok { color: #31a24c; }
+  button.send {
+    width: 100%; margin-top: 10px; border: none; border-radius: 10px; cursor: pointer;
+    background: #a9d6f5; color: #fff; font-size: 16.5px; font-weight: 600;
+    padding: 14px 0; transition: background .15s;
+  }
+  button.send.active { background: #2aabee; }
+  button.send:disabled { opacity: .75; cursor: default; }
+  .footer { text-align: center; color: #9aa1a6; font-size: 12px; margin-top: 14px; line-height: 1.6; }
+  .bot-at { text-align: center; color: #707579; font-size: 13px; margin-top: 16px; }
+  .overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88);
+    align-items: center; justify-content: center; z-index: 50; cursor: zoom-out;
+  }
+  .overlay.show { display: flex; }
+  .overlay img { max-width: 94vw; max-height: 92vh; border-radius: 6px; }
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="head">
+    <div class="logo"><span>A6</span></div>
+    <div class="head-main">
+      <div class="group-name">__GROUP_NAME__</div>
+      <div class="subtitle" data-i18n="subtitle"></div>
+    </div>
+    <div class="lang-wrap">
+      <select id="lang" aria-label="Language">
+        <option value="zh-CN">简体中文</option>
+        <option value="en">English</option>
+        <option value="zh-TW">繁體中文</option>
+        <option value="fr">Français</option>
+        <option value="ja">日本語</option>
+        <option value="vi">Tiếng Việt</option>
+        <option value="es">Español</option>
+        <option value="pt-BR">Português (Brasil)</option>
+        <option value="de">Deutsch</option>
+        <option value="ko">한국어</option>
+        <option value="id">Bahasa Indonesia</option>
+        <option value="tr">Türkçe</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="intro"><div class="dot"></div><div data-i18n="intro"></div></div>
+
+  <div class="reply-banner" id="replyBanner"></div>
+
+  <div class="ask-row">
+    <div class="ask" data-i18n="ask"></div>
+    <div class="counter"><span id="count">0</span> / 3800</div>
+  </div>
+  <textarea id="text" maxlength="3800"></textarea>
+  <div class="hint" data-i18n="hint_keys"></div>
+
+  <div class="img-row">
+    <button type="button" class="add-img" id="addImg" data-i18n="add_image"></button>
+    <span class="img-note" data-i18n="max_images"></span>
+    <input type="file" id="file" accept="image/*" multiple hidden>
+  </div>
+  <div class="hint" data-i18n="drag_hint"></div>
+  <div class="thumbs" id="thumbs"></div>
+
+  <div class="meta-row">
+    <div class="nickname"><span data-i18n="nickname_label"></span><span id="nickMask"></span></div>
+    <label class="ret"><input type="checkbox" id="retGroup" checked><span data-i18n="return_group"></span></label>
+  </div>
+  <div class="status" id="status"></div>
+
+  <button type="button" class="send" id="sendBtn"><span data-i18n="send_btn"></span> &#8599;</button>
+
+  <div class="footer" data-i18n="footer"></div>
+  <div class="bot-at">@__BOT_USERNAME__</div>
+</div>
+
+<div class="overlay" id="overlay"><img id="overlayImg" alt=""></div>
+
+<script>
+"use strict";
+const I18N = {
+  "zh-CN": {"subtitle": "匿名发言 · 文字和图片", "intro": "写下想说的话，与群友匿名交流。你的原始消息不会出现在群里。", "ask": "想说些什么？", "placeholder": "输入想说的话，支持文字和图片...", "hint_keys": "Ctrl / ⌘ + Enter 换行，Enter 发送", "add_image": "+ 添加图片", "max_images": "最多 10 张，可多选", "drag_hint": "可拖入图片，或 Ctrl / ⌘ + V 粘贴；点击图片放大预览", "nickname_label": "发言昵称：", "return_group": "发送后返回群聊", "ready": "准备就绪。", "sending": "正在发送...", "sent": "已发送 ✓", "send_btn": "匿名发送", "footer": "群内仅展示打码昵称，管理员可核查发言身份。", "replying": "正在回复", "too_many": "最多 10 张图片", "need_content": "请先输入文字或添加图片", "failed": "发送失败"},
+  "en": {"subtitle": "Anonymous posting · Text and images", "intro": "Write what you want to say and chat with members anonymously. Your original message will not appear in the group.", "ask": "What would you like to say?", "placeholder": "Type what you want to say. Text and images supported...", "hint_keys": "Ctrl / ⌘ + Enter for a new line, Enter to send", "add_image": "+ Add images", "max_images": "Up to 10, multiple allowed", "drag_hint": "Drag images here, or paste with Ctrl / ⌘ + V; click an image to enlarge", "nickname_label": "Posting nickname: ", "return_group": "Return to group chat after sending", "ready": "Ready.", "sending": "Sending...", "sent": "Sent ✓", "send_btn": "Send anonymously", "footer": "Only a masked nickname is shown in the group. Admins can verify the sender's identity.", "replying": "Replying to", "too_many": "Up to 10 images", "need_content": "Please enter text or add an image first", "failed": "Failed to send"},
+  "zh-TW": {"subtitle": "匿名發言 · 文字和圖片", "intro": "寫下想說的話，與群友匿名交流。你的原始消息不會出現在群組裡。", "ask": "想說些什麼？", "placeholder": "輸入想說的話，支持文字和圖片...", "hint_keys": "Ctrl / ⌘ + Enter 換行，Enter 發送", "add_image": "+ 添加圖片", "max_images": "最多 10 張，可多選", "drag_hint": "可拖入圖片，或 Ctrl / ⌘ + V 貼上；點擊圖片放大預覽", "nickname_label": "發言暱稱：", "return_group": "發送後返回群聊", "ready": "準備就緒。", "sending": "正在發送...", "sent": "已發送 ✓", "send_btn": "匿名發送", "footer": "群內僅展示打碼暱稱，管理員可核查發言身份。", "replying": "正在回覆", "too_many": "最多 10 張圖片", "need_content": "請先輸入文字或添加圖片", "failed": "發送失敗"},
+  "fr": {"subtitle": "Publication anonyme · Texte et images", "intro": "Écrivez ce que vous voulez dire et discutez anonymement avec les membres. Votre message d'origine n'apparaîtra pas dans le groupe.", "ask": "Que voulez-vous dire ?", "placeholder": "Saisissez votre message, texte et images pris en charge...", "hint_keys": "Ctrl / ⌘ + Entrée pour un saut de ligne, Entrée pour envoyer", "add_image": "+ Ajouter des images", "max_images": "10 max., sélection multiple", "drag_hint": "Glissez des images ou collez avec Ctrl / ⌘ + V ; cliquez pour agrandir", "nickname_label": "Pseudo d'envoi : ", "return_group": "Revenir au groupe après l'envoi", "ready": "Prêt.", "sending": "Envoi en cours...", "sent": "Envoyé ✓", "send_btn": "Envoyer anonymement", "footer": "Seul un pseudo masqué est affiché dans le groupe. Les administrateurs peuvent vérifier l'identité.", "replying": "Réponse à", "too_many": "10 images maximum", "need_content": "Saisissez d'abord un texte ou ajoutez une image", "failed": "Échec de l'envoi"},
+  "ja": {"subtitle": "匿名投稿 · テキストと画像", "intro": "言いたいことを書いて、メンバーと匿名で交流しましょう。元のメッセージがグループに表示されることはありません。", "ask": "何を言いますか？", "placeholder": "言いたいことを入力。テキストと画像に対応...", "hint_keys": "Ctrl / ⌘ + Enter で改行、Enter で送信", "add_image": "+ 画像を追加", "max_images": "最大10枚、複数選択可", "drag_hint": "画像をドラッグ、または Ctrl / ⌘ + V で貼り付け；クリックで拡大", "nickname_label": "投稿ニックネーム：", "return_group": "送信後にグループチャットへ戻る", "ready": "準備完了。", "sending": "送信中...", "sent": "送信しました ✓", "send_btn": "匿名で送信", "footer": "グループ内ではマスクされたニックネームのみ表示されます。管理者は身元を確認できます。", "replying": "返信先", "too_many": "画像は最大10枚まで", "need_content": "まずテキストを入力するか画像を追加してください", "failed": "送信に失敗しました"},
+  "vi": {"subtitle": "Phát biểu ẩn danh · Văn bản và hình ảnh", "intro": "Viết điều bạn muốn nói và trò chuyện ẩn danh với mọi người. Tin nhắn gốc của bạn sẽ không xuất hiện trong nhóm.", "ask": "Bạn muốn nói gì?", "placeholder": "Nhập điều muốn nói, hỗ trợ văn bản và hình ảnh...", "hint_keys": "Ctrl / ⌘ + Enter để xuống dòng, Enter để gửi", "add_image": "+ Thêm hình ảnh", "max_images": "Tối đa 10 ảnh, chọn nhiều", "drag_hint": "Kéo thả hình ảnh, hoặc dán bằng Ctrl / ⌘ + V; nhấp để phóng to", "nickname_label": "Biệt danh phát biểu: ", "return_group": "Quay lại nhóm sau khi gửi", "ready": "Sẵn sàng.", "sending": "Đang gửi...", "sent": "Đã gửi ✓", "send_btn": "Gửi ẩn danh", "footer": "Nhóm chỉ hiển thị biệt danh đã che. Quản trị viên có thể xác minh danh tính.", "replying": "Đang trả lời", "too_many": "Tối đa 10 hình ảnh", "need_content": "Hãy nhập văn bản hoặc thêm hình ảnh trước", "failed": "Gửi thất bại"},
+  "es": {"subtitle": "Publicación anónima · Texto e imágenes", "intro": "Escribe lo que quieras decir y conversa de forma anónima. Tu mensaje original no aparecerá en el grupo.", "ask": "¿Qué quieres decir?", "placeholder": "Escribe lo que quieres decir. Texto e imágenes compatibles...", "hint_keys": "Ctrl / ⌘ + Enter para nueva línea, Enter para enviar", "add_image": "+ Añadir imágenes", "max_images": "Hasta 10, selección múltiple", "drag_hint": "Arrastra imágenes o pega con Ctrl / ⌘ + V; haz clic para ampliar", "nickname_label": "Apodo de envío: ", "return_group": "Volver al grupo tras enviar", "ready": "Listo.", "sending": "Enviando...", "sent": "Enviado ✓", "send_btn": "Enviar anónimamente", "footer": "En el grupo solo se muestra un apodo enmascarado. Los administradores pueden verificar la identidad.", "replying": "Respondiendo a", "too_many": "Hasta 10 imágenes", "need_content": "Primero escribe un texto o añade una imagen", "failed": "Error al enviar"},
+  "pt-BR": {"subtitle": "Publicação anônima · Texto e imagens", "intro": "Escreva o que quer dizer e converse anonimamente com o grupo. Sua mensagem original não aparecerá no grupo.", "ask": "O que você quer dizer?", "placeholder": "Digite o que quer dizer. Suporta texto e imagens...", "hint_keys": "Ctrl / ⌘ + Enter para nova linha, Enter para enviar", "add_image": "+ Adicionar imagens", "max_images": "Até 10, seleção múltipla", "drag_hint": "Arraste imagens ou cole com Ctrl / ⌘ + V; clique para ampliar", "nickname_label": "Apelido de envio: ", "return_group": "Voltar ao grupo após enviar", "ready": "Pronto.", "sending": "Enviando...", "sent": "Enviado ✓", "send_btn": "Enviar anonimamente", "footer": "No grupo, apenas um apelido mascarado é exibido. Administradores podem verificar a identidade.", "replying": "Respondendo a", "too_many": "Até 10 imagens", "need_content": "Digite um texto ou adicione uma imagem primeiro", "failed": "Falha no envio"},
+  "de": {"subtitle": "Anonym posten · Text und Bilder", "intro": "Schreib, was du sagen möchtest, und chatte anonym mit der Gruppe. Deine ursprüngliche Nachricht erscheint nicht in der Gruppe.", "ask": "Was möchtest du sagen?", "placeholder": "Gib ein, was du sagen möchtest. Text und Bilder werden unterstützt...", "hint_keys": "Strg / ⌘ + Enter für neue Zeile, Enter zum Senden", "add_image": "+ Bilder hinzufügen", "max_images": "Max. 10, Mehrfachauswahl", "drag_hint": "Bilder hierher ziehen oder mit Strg / ⌘ + V einfügen; zum Vergrößern klicken", "nickname_label": "Anzeigename: ", "return_group": "Nach dem Senden zur Gruppe zurück", "ready": "Bereit.", "sending": "Wird gesendet...", "sent": "Gesendet ✓", "send_btn": "Anonym senden", "footer": "In der Gruppe wird nur ein maskierter Name gezeigt. Admins können die Identität prüfen.", "replying": "Antwort an", "too_many": "Maximal 10 Bilder", "need_content": "Bitte zuerst Text eingeben oder ein Bild hinzufügen", "failed": "Senden fehlgeschlagen"},
+  "ko": {"subtitle": "익명 발언 · 텍스트와 이미지", "intro": "하고 싶은 말을 적어 그룹 멤버들과 익명으로 대화하세요. 원본 메시지는 그룹에 표시되지 않습니다.", "ask": "무슨 말을 하고 싶나요?", "placeholder": "하고 싶은 말을 입력하세요. 텍스트와 이미지를 지원합니다...", "hint_keys": "Ctrl / ⌘ + Enter 줄바꿈, Enter 전송", "add_image": "+ 이미지 추가", "max_images": "최대 10장, 다중 선택 가능", "drag_hint": "이미지를 드래그하거나 Ctrl / ⌘ + V 로 붙여넣기; 클릭하면 확대", "nickname_label": "발언 닉네임: ", "return_group": "전송 후 그룹 채팅으로 돌아가기", "ready": "준비 완료.", "sending": "전송 중...", "sent": "전송됨 ✓", "send_btn": "익명 전송", "footer": "그룹에는 마스킹된 닉네임만 표시됩니다. 관리자는 신원을 확인할 수 있습니다.", "replying": "답장 대상", "too_many": "이미지는 최대 10장", "need_content": "먼저 텍스트를 입력하거나 이미지를 추가하세요", "failed": "전송 실패"},
+  "id": {"subtitle": "Posting anonim · Teks dan gambar", "intro": "Tulis yang ingin Anda katakan dan mengobrol secara anonim dengan anggota grup. Pesan asli Anda tidak akan muncul di grup.", "ask": "Ingin mengatakan apa?", "placeholder": "Ketik yang ingin dikatakan. Mendukung teks dan gambar...", "hint_keys": "Ctrl / ⌘ + Enter baris baru, Enter untuk kirim", "add_image": "+ Tambah gambar", "max_images": "Maks 10, bisa multi-pilih", "drag_hint": "Seret gambar, atau tempel dengan Ctrl / ⌘ + V; klik untuk memperbesar", "nickname_label": "Nama samaran: ", "return_group": "Kembali ke grup setelah terkirim", "ready": "Siap.", "sending": "Mengirim...", "sent": "Terkirim ✓", "send_btn": "Kirim anonim", "footer": "Hanya nama samaran yang ditampilkan di grup. Admin dapat memverifikasi identitas pengirim.", "replying": "Membalas", "too_many": "Maksimal 10 gambar", "need_content": "Masukkan teks atau tambahkan gambar dulu", "failed": "Gagal mengirim"},
+  "tr": {"subtitle": "Anonim paylaşım · Metin ve görseller", "intro": "Söylemek istediklerinizi yazın ve grup üyeleriyle anonim sohbet edin. Orijinal mesajınız grupta görünmez.", "ask": "Ne söylemek istersiniz?", "placeholder": "Söylemek istediklerinizi yazın. Metin ve görsel desteklenir...", "hint_keys": "Yeni satır için Ctrl / ⌘ + Enter, göndermek için Enter", "add_image": "+ Görsel ekle", "max_images": "En fazla 10, çoklu seçim", "drag_hint": "Görselleri sürükleyin veya Ctrl / ⌘ + V ile yapıştırın; büyütmek için tıklayın", "nickname_label": "Gönderim adı: ", "return_group": "Gönderdikten sonra gruba dön", "ready": "Hazır.", "sending": "Gönderiliyor...", "sent": "Gönderildi ✓", "send_btn": "Anonim gönder", "footer": "Grupta yalnızca maskeli bir ad gösterilir. Yöneticiler gönderenin kimliğini doğrulayabilir.", "replying": "Yanıtlanan", "too_many": "En fazla 10 görsel", "need_content": "Önce metin girin veya görsel ekleyin", "failed": "Gönderilemedi"},
+  "ar": {"subtitle": "نشر مجهول · نص وصور", "intro": "اكتب ما تريد قوله وتحدث مع أعضاء المجموعة بشكل مجهول. لن تظهر رسالتك الأصلية في المجموعة.", "ask": "ماذا تريد أن تقول؟", "placeholder": "اكتب ما تريد قوله، يدعم النص والصور...", "hint_keys": "Ctrl / ⌘ + Enter لسطر جديد، Enter للإرسال", "add_image": "+ إضافة صور", "max_images": "حتى 10، اختيار متعدد", "drag_hint": "اسحب الصور أو الصق بـ Ctrl / ⌘ + V؛ انقر للتكبير", "nickname_label": "اسم العرض: ", "return_group": "العودة إلى المجموعة بعد الإرسال", "ready": "جاهز.", "sending": "جارٍ الإرسال...", "sent": "تم الإرسال ✓", "send_btn": "إرسال مجهول", "footer": "يظهر في المجموعة اسم مستعار مقنّع فقط. يمكن للمشرفين التحقق من هوية المرسل.", "replying": "رد على", "too_many": "حتى 10 صور", "need_content": "أدخل نصًا أو أضف صورة أولاً", "failed": "فشل الإرسال"}
+};
+const MAX_IMAGES = 10, MAX_LEN = 3800;
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); }
+const $ = (id) => document.getElementById(id);
+const textEl = $("text"), countEl = $("count"), statusEl = $("status"),
+      sendBtn = $("sendBtn"), thumbsEl = $("thumbs"), langSel = $("lang");
+let images = [];   // {file, url}
+let busy = false;
+let curLang = "zh-CN";
+const T = () => I18N[curLang] || I18N["zh-CN"];
+
+function maskName(name) {
+  name = (name || "").trim();
+  if (!name) return "******";
+  const chars = Array.from(name);
+  if (chars.length === 1) return chars[0] + "******" + chars[0];
+  return chars[0] + "******" + chars[chars.length - 1];
+}
+function setStatus(key, cls) {
+  statusEl.textContent = typeof key === "string" && T()[key] ? T()[key] : key;
+  statusEl.className = "status" + (cls ? " " + cls : "");
+}
+function applyLang(lang) {
+  if (!I18N[lang]) lang = "zh-CN";
+  curLang = lang;
+  langSel.value = lang;
+  const d = T();
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    const k = el.getAttribute("data-i18n");
+    if (d[k]) el.textContent = d[k];
+  });
+  textEl.placeholder = d.placeholder;
+  document.documentElement.lang = lang;
+  document.body.dir = lang === "ar" ? "rtl" : "ltr";
+  setStatus("ready");
+  try { localStorage.setItem("anon_lang", lang); } catch (e) {}
+}
+function detectLang() {
+  try {
+    const saved = localStorage.getItem("anon_lang");
+    if (saved && I18N[saved]) return saved;
+  } catch (e) {}
+  const code = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user &&
+                tg.initDataUnsafe.user.language_code || "").toLowerCase();
+  if (code.startsWith("zh")) return /tw|hk|hant/.test(code) ? "zh-TW" : "zh-CN";
+  if (code.startsWith("pt")) return "pt-BR";
+  const map = {en: "en", fr: "fr", ja: "ja", vi: "vi", es: "es", de: "de",
+               ko: "ko", id: "id", tr: "tr", ar: "ar"};
+  return map[code.slice(0, 2)] || "zh-CN";
+}
+langSel.addEventListener("change", () => applyLang(langSel.value));
+
+// 昵称打码（与原版一致：P******d）
+(function initNick() {
+  let name = "Pseudod";
+  if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    const u = tg.initDataUnsafe.user;
+    name = ((u.first_name || "") + (u.last_name || "")) || u.username || name;
+  }
+  $("nickMask").textContent = maskName(name);
+})();
+
+// 回复目标（弹窗发言按钮经 startapp=reply_<消息ID> 带入）
+const startParam = (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) ||
+  new URLSearchParams(location.search).get("startapp") || "";
+let replyTo = 0;
+(function initReply() {
+  const m = /^reply_(\d+)$/.exec(startParam || "");
+  const q = new URLSearchParams(location.search).get("reply");
+  if (m) replyTo = parseInt(m[1], 10);
+  else if (q && /^\d+$/.test(q)) replyTo = parseInt(q, 10);
+  if (!replyTo) return;
+  fetch("/api/reply-info", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({initData: tg ? tg.initData : "preview", replyTo: replyTo})
+  }).then((r) => r.json()).then((d) => {
+    if (d && d.ok && d.codename) {
+      const b = $("replyBanner");
+      b.textContent = "↩ " + T().replying + " " + d.codename + "：" + d.snippet;
+      b.style.display = "block";
+    }
+  }).catch(() => {});
+})();
+
+function refreshSendState() {
+  countEl.textContent = String(textEl.value.length);
+  sendBtn.classList.toggle("active", !!(textEl.value.trim() || images.length));
+}
+textEl.addEventListener("input", refreshSendState);
+textEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+    e.preventDefault();
+    doSend();
+  }
+});
+
+function addFiles(fileList) {
+  const files = Array.from(fileList || []).filter((f) => f.type.startsWith("image/"));
+  for (const f of files) {
+    if (images.length >= MAX_IMAGES) { setStatus("too_many", "err"); break; }
+    images.push({file: f, url: URL.createObjectURL(f)});
+  }
+  renderThumbs();
+  refreshSendState();
+}
+function renderThumbs() {
+  thumbsEl.innerHTML = "";
+  images.forEach((im, i) => {
+    const box = document.createElement("div");
+    box.className = "thumb";
+    const img = document.createElement("img");
+    img.src = im.url; img.alt = "";
+    img.addEventListener("click", () => {
+      $("overlayImg").src = im.url;
+      $("overlay").classList.add("show");
+    });
+    const rm = document.createElement("button");
+    rm.className = "rm"; rm.textContent = "×"; rm.type = "button";
+    rm.addEventListener("click", () => {
+      URL.revokeObjectURL(images[i].url);
+      images.splice(i, 1);
+      renderThumbs(); refreshSendState();
+    });
+    box.appendChild(img); box.appendChild(rm);
+    thumbsEl.appendChild(box);
+  });
+}
+$("overlay").addEventListener("click", () => $("overlay").classList.remove("show"));
+$("addImg").addEventListener("click", () => $("file").click());
+$("file").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
+const card = $("card");
+["dragenter", "dragover"].forEach((ev) => card.addEventListener(ev, (e) => {
+  e.preventDefault(); card.classList.add("dragover");
+}));
+["dragleave", "drop"].forEach((ev) => card.addEventListener(ev, (e) => {
+  e.preventDefault(); card.classList.remove("dragover");
+}));
+card.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+document.addEventListener("paste", (e) => {
+  const items = (e.clipboardData || {}).items || [];
+  const files = [];
+  for (const it of items) if (it.type.startsWith("image/")) files.push(it.getAsFile());
+  if (files.length) addFiles(files);
+});
+
+function readAsB64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",", 2)[1] || "");
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+async function doSend() {
+  if (busy) return;
+  const text = textEl.value.trim();
+  if (!text && !images.length) { setStatus("need_content", "err"); return; }
+  busy = true;
+  sendBtn.disabled = true;
+  setStatus("sending");
+  try {
+    const imgs = [];
+    for (const im of images) {
+      imgs.push({name: im.file.name || "photo.jpg", data: await readAsB64(im.file)});
+    }
+    const resp = await fetch("/api/post", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        initData: tg ? tg.initData : "preview",
+        startParam: startParam, text: text, images: imgs,
+        replyTo: replyTo || 0, returnToGroup: $("retGroup").checked
+      })
+    });
+    const d = await resp.json();
+    if (!resp.ok || !d.ok) throw new Error(d.error || resp.status);
+    setStatus("sent", "ok");
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("success");
+    if ($("retGroup").checked && tg) {
+      setTimeout(() => tg.close(), 400);
+    } else {
+      textEl.value = "";
+      images.forEach((im) => URL.revokeObjectURL(im.url));
+      images = [];
+      renderThumbs(); refreshSendState();
+      replyTo = 0;
+      $("replyBanner").style.display = "none";
+      setTimeout(() => setStatus("ready"), 1800);
+    }
+  } catch (err) {
+    setStatus(T().failed + (err && err.message ? "：" + err.message : ""), "err");
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred("error");
+  } finally {
+    busy = false;
+    sendBtn.disabled = false;
+  }
+}
+sendBtn.addEventListener("click", doSend);
+
+applyLang(detectLang());
+refreshSendState();
+</script>
+</body>
+</html>

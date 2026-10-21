@@ -1,0 +1,17 @@
+# Author: Passwd Word
+services:
+  anon-bot:
+    image: ghcr.io/judy-gotv/telegram-bot-webapp:latest
+    # 本地构建则改用下面两行（注释掉 image）：
+    # build: .
+    # image: telegram-bot-webapp:local
+    container_name: anon-bot
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: "8080"
+      DB_PATH: /data/anon.db
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/data
