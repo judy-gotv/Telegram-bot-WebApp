@@ -291,9 +291,11 @@ def message_link(group_msg_id):
 def post_keyboard(group_msg_id):
     """群内每条匿名消息下方的两个按钮（与原版 1:1）。"""
     if APP_SHORT_NAME:
+        # /newapp 建的命名小程序：t.me/<bot>/<短名>?startapp=
         popup_url = "https://t.me/%s/%s?startapp=reply_%s" % (BOT_USERNAME, APP_SHORT_NAME, group_msg_id)
     else:
-        popup_url = "https://t.me/%s?start=reply_%s" % (BOT_USERNAME, group_msg_id)
+        # Bot Settings 里启用的主小程序（Main Mini App）：t.me/<bot>?startapp=
+        popup_url = "https://t.me/%s?startapp=reply_%s" % (BOT_USERNAME, group_msg_id)
     private_url = "https://t.me/%s?start=reply_%s" % (BOT_USERNAME, group_msg_id)
     return {"inline_keyboard": [[
         {"text": "✍️ 弹窗发言", "url": popup_url},

@@ -49,9 +49,8 @@
 
 1. 私聊 [@BotFather](https://t.me/BotFather) → `/newbot`，按提示取名、设用户名，拿到 **BOT_TOKEN**。
 2. （可选，建议）`/setuserpic` 给机器人换头像；`/setdescription`、`/setabouttext` 填介绍。
-3. **创建 Mini App**（弹窗发言必需）：`/newapp` → 选择机器人 → 填标题/简介/图片 →
-   - Web App URL 填你的公网地址，如 `https://bot.example.com/`
-   - Short name 填一个短名，如 `app` —— 记下来填进 `.env` 的 `APP_SHORT_NAME`
+3. **启用 Mini App**（弹窗发言必需）：`/mybots` → 选择机器人 → **Bot Settings → Mini App → Enable Mini App**，然后把你的公网地址（如 `https://bot.example.com/`）作为一条消息发给 BotFather 即可。这种「主小程序」不需要 short name，`.env` 的 `APP_SHORT_NAME` 留空。
+   （另一种建法 `/newapp` 建的是命名小程序，最后一步的 short name 需回填到 `APP_SHORT_NAME`，二选一即可。）
 4. 把机器人拉进目标群，并设为**管理员**（需要发消息、删消息权限）。
 
 ### 2）启动服务
