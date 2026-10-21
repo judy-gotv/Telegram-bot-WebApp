@@ -83,7 +83,7 @@ Telegram 小程序只接受 **HTTPS** 地址。用你现有的反向代理把域
 
 ```
 bot.example.com {
-    reverse_proxy 127.0.0.1:8080
+    reverse_proxy 127.0.0.1:19952
 }
 ```
 
